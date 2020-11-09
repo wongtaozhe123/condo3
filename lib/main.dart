@@ -251,30 +251,34 @@ class _HomeState extends State<Home> {
               ),
               Row(
                 children: [
-                  Container(
-                    margin: EdgeInsets.fromLTRB(10, 5,10, 5),
-                    padding: EdgeInsets.all(25),
-                    child: RaisedButton.icon(
-                      onPressed: () async {
-                        try{
-                          Future<void> async;{
-                            await _googleSignIn.signIn();
-                          }
-                        }catch(error){print(error);}
-                      },
-                      color: Colors.red,
-                      icon: Icon(Icons.email_rounded),
-                      label: Text('G-Mail'),
+                  Expanded(
+                    flex: 1,
+                    child: Container(
+                      padding: EdgeInsets.all(25),
+                      child: RaisedButton.icon(
+                        onPressed: () async {
+                          try{
+                            Future<void> async;{
+                              await _googleSignIn.signIn();
+                            }
+                          }catch(error){print(error);}
+                        },
+                        color: Colors.red,
+                        icon: Icon(Icons.email_rounded),
+                        label: Text('G-Mail'),
+                      ),
                     ),
                   ),
-                  Container(
-                    margin: EdgeInsets.fromLTRB(10, 5,10, 5),
-                    padding: EdgeInsets.all(20),
-                    child: RaisedButton.icon(
-                      color: Colors.blue,
-                      onPressed: (){},
-                      icon: Icon(Icons.location_on),
-                      label: Text('Facebook'),
+                  Expanded(
+                    flex: 1,
+                    child: Container(
+                      padding: EdgeInsets.all(20),
+                      child: RaisedButton.icon(
+                        color: Colors.blue,
+                        onPressed: (){},
+                        icon: Icon(Icons.tag_faces),
+                        label: Text('Facebook'),
+                      ),
                     ),
                   )
                 ],
