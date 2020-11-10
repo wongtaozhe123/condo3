@@ -271,6 +271,7 @@ class _HomeState extends State<Home> {
                           try{
                             Future<void> async;{
                               await _googleSignIn.signIn();
+                              print(_googleSignIn);
                             }
                           }catch(error){
                             print(error.toString());
@@ -297,33 +298,39 @@ class _HomeState extends State<Home> {
                       child: RaisedButton.icon(
                         color: Colors.blue,
                         onPressed: () async{
-                          final result = await facebookLogin.logIn();
-                          switch(result.status){
-                            case FacebookLoginStatus.Success:
-                              final token=result.accessToken.token;
-                              final graphResponse=await http.get('https://graph.facebook.com/v2.12/me?fields=name,picture,email&access_token=$token');
-                              final profile=JSON.jsonDecode(graphResponse.body);
-                              print(profile);
-                              setState(() {
-                                facebookProfile=profile;
-                                fbLogin=true;
-                              });
-                              break;
-                            case FacebookLoginStatus.Cancel:
-                              setState(() {
-                                fbLogin=false;
-                              });
-                              break;
-                            case FacebookLoginStatus.Error:
-                              setState(() {
-                                fbLogin=false;
-                                Fluttertoast.showToast(msg: ErrorDescription('Error login in with Facebook').toString(),
-                                  toastLength: Toast.LENGTH_SHORT,
-                                  gravity: ToastGravity.CENTER,
-                                  backgroundColor: Colors.black,
-                                  textColor: Colors.white,
-                                );
-                              });
+                          if(!fbLogin){
+                            final result = await facebookLogin.logIn();
+                            print(result);
+                            switch(result.status){
+                              case FacebookLoginStatus.Success:
+                                final token=result.accessToken.token;
+                                final graphResponse=await http.get('https://graph.facebook.com/v2.12/me?fields=name,picture,email&access_token=$token');
+                                final profile=JSON.jsonDecode(graphResponse.body);
+                                print(profile['name']);
+                                setState(() {
+                                  facebookProfile=profile;
+                                  fbLogin=true;
+                                });
+                                break;
+                              case FacebookLoginStatus.Cancel:
+                                setState(() {
+                                  fbLogin=false;
+                                });
+                                break;
+                              case FacebookLoginStatus.Error:
+                                setState(() {
+                                  fbLogin=false;
+                                  Fluttertoast.showToast(msg: ErrorDescription(result.error.toString()).toString(),
+                                    toastLength: Toast.LENGTH_SHORT,
+                                    gravity: ToastGravity.CENTER,
+                                    backgroundColor: Colors.black,
+                                    textColor: Colors.white,
+                                  );
+                                });
+                            }
+                          }
+                          else{
+                            print('xxxx');
                           }
                         },
                         icon: Icon(Icons.tag_faces),
@@ -333,7 +340,7 @@ class _HomeState extends State<Home> {
                   )
                 ],
               ),
-              SizedBox(height: 90,)
+              SizedBox(height: 90,),
             ],
           ),
         ),
