@@ -1,5 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:mysql1/mysql1.dart';
+import 'package:user_login/MySqlRegistration.dart';
 
 void main() => runApp(MaterialApp(
   home: Register(),
@@ -29,6 +31,8 @@ class _RegisterState extends State<Register> {
   String condoError;
   final address=TextEditingController();
   String addressError;
+
+  var db=new MySqlRegistration();
 
   @override
   Widget build(BuildContext context) {
@@ -301,8 +305,8 @@ class _RegisterState extends State<Register> {
                               passwordError='Field cannot be empty';
                             }
                             else{
-                              if(password.text.length<8){
-                                passwordError='Password must have at least 8 characters';
+                              if(password.text.length<8&&password.text.length>20){
+                                passwordError='Password must be between 8 to 20 characters';
                               }
                               else{
                                 if(rg.hasMatch(password.text)){

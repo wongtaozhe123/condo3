@@ -35,9 +35,10 @@ class _HomeState extends State<Home> {
   final password=TextEditingController();
   bool seePassword=true;
   String passwordError;
+
   // VARIABLES FOR GOOGLE LOGIN
   GoogleSignInAccount currentUser;
-  
+
   // VARIABLES FOR FACEBOOK LOGIN
   final facebookLogin = FacebookLogin();
   Map facebookProfile;
@@ -51,6 +52,7 @@ class _HomeState extends State<Home> {
         currentUser=account;
       });
     });
+    _googleSignIn.signInSilently();
   }
   @override
   Widget build(BuildContext context) {
@@ -268,21 +270,29 @@ class _HomeState extends State<Home> {
                       padding: EdgeInsets.all(25),
                       child: RaisedButton.icon(
                         onPressed: () async {
-                          try{
+                          if(currentUser==null){
                             Future<void> async;{
-                              await _googleSignIn.signIn();
-                              print(_googleSignIn);
+                              try{
+                                await _googleSignIn.signIn();
+                                print(_googleSignIn);
+                              }catch(error){
+                                print(error.toString());
+                                setState(() {
+                                  Fluttertoast.showToast(msg: error.toString(),
+                                    toastLength: Toast.LENGTH_SHORT,
+                                    gravity: ToastGravity.CENTER,
+                                    backgroundColor: Colors.black,
+                                    textColor: Colors.white,
+                                  );
+                                });
+                              }
                             }
-                          }catch(error){
-                            print(error.toString());
-                            setState(() {
-                              Fluttertoast.showToast(msg: error.toString(),
-                                toastLength: Toast.LENGTH_SHORT,
-                                gravity: ToastGravity.CENTER,
-                                backgroundColor: Colors.black,
-                                textColor: Colors.white,
-                              );
-                            });
+
+                          }
+                          else{
+                            Future<void> async;{
+                              _googleSignIn.disconnect();
+                            }
                           }
                         },
                         color: Colors.red,
