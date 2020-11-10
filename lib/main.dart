@@ -1,6 +1,12 @@
+import 'dart:io';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:flutter_login_facebook/flutter_login_facebook.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert' as JSON;
+import 'package:fluttertoast/fluttertoast.dart';
 
 GoogleSignIn _googleSignIn=GoogleSignIn(
   scopes: [
@@ -29,8 +35,13 @@ class _HomeState extends State<Home> {
   final password=TextEditingController();
   bool seePassword=true;
   String passwordError;
-
+  // VARIABLES FOR GOOGLE LOGIN
   GoogleSignInAccount currentUser;
+  
+  // VARIABLES FOR FACEBOOK LOGIN
+  final facebookLogin = FacebookLogin();
+  Map facebookProfile;
+  bool fbLogin = false;
 
   @override
   void initState(){
@@ -261,7 +272,17 @@ class _HomeState extends State<Home> {
                             Future<void> async;{
                               await _googleSignIn.signIn();
                             }
-                          }catch(error){print(error);}
+                          }catch(error){
+                            print(error.toString());
+                            setState(() {
+                              Fluttertoast.showToast(msg: error.toString(),
+                                toastLength: Toast.LENGTH_SHORT,
+                                gravity: ToastGravity.CENTER,
+                                backgroundColor: Colors.black,
+                                textColor: Colors.white,
+                              );
+                            });
+                          }
                         },
                         color: Colors.red,
                         icon: Icon(Icons.email_rounded),
@@ -275,7 +296,36 @@ class _HomeState extends State<Home> {
                       padding: EdgeInsets.all(20),
                       child: RaisedButton.icon(
                         color: Colors.blue,
-                        onPressed: (){},
+                        onPressed: () async{
+                          final result = await facebookLogin.logIn();
+                          switch(result.status){
+                            case FacebookLoginStatus.Success:
+                              final token=result.accessToken.token;
+                              final graphResponse=await http.get('https://graph.facebook.com/v2.12/me?fields=name,picture,email&access_token=$token');
+                              final profile=JSON.jsonDecode(graphResponse.body);
+                              print(profile);
+                              setState(() {
+                                facebookProfile=profile;
+                                fbLogin=true;
+                              });
+                              break;
+                            case FacebookLoginStatus.Cancel:
+                              setState(() {
+                                fbLogin=false;
+                              });
+                              break;
+                            case FacebookLoginStatus.Error:
+                              setState(() {
+                                fbLogin=false;
+                                Fluttertoast.showToast(msg: ErrorDescription('Error login in with Facebook').toString(),
+                                  toastLength: Toast.LENGTH_SHORT,
+                                  gravity: ToastGravity.CENTER,
+                                  backgroundColor: Colors.black,
+                                  textColor: Colors.white,
+                                );
+                              });
+                          }
+                        },
                         icon: Icon(Icons.tag_faces),
                         label: Text('Facebook'),
                       ),
@@ -290,4 +340,5 @@ class _HomeState extends State<Home> {
       ),
     );
   }
+
 }
