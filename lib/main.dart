@@ -9,9 +9,9 @@ import 'dart:convert' as JSON;
 import 'package:fluttertoast/fluttertoast.dart';
 
 GoogleSignIn _googleSignIn=GoogleSignIn(
-  scopes: [
-    'profile',
-    'emails'
+  scopes: <String> [
+    'email',
+    'https://www.googleapis.com/auth/contacts.readonly',
   ]
 );
 
@@ -52,8 +52,10 @@ class _HomeState extends State<Home> {
         currentUser=account;
       });
     });
+    print('$currentUser, is xxxx');
     _googleSignIn.signInSilently();
   }
+
   @override
   Widget build(BuildContext context) {
 
@@ -269,30 +271,12 @@ class _HomeState extends State<Home> {
                     child: Container(
                       padding: EdgeInsets.all(25),
                       child: RaisedButton.icon(
-                        onPressed: () async {
+                        onPressed: () {
                           if(currentUser==null){
-                            Future<void> async;{
-                              try{
-                                await _googleSignIn.signIn();
-                                print(_googleSignIn);
-                              }catch(error){
-                                print(error.toString());
-                                setState(() {
-                                  Fluttertoast.showToast(msg: error.toString(),
-                                    toastLength: Toast.LENGTH_SHORT,
-                                    gravity: ToastGravity.CENTER,
-                                    backgroundColor: Colors.black,
-                                    textColor: Colors.white,
-                                  );
-                                });
-                              }
-                            }
-
+                            googleSignIn();
                           }
                           else{
-                            Future<void> async;{
-                              _googleSignIn.disconnect();
-                            }
+                            print('$currentUser.email, not null when press');
                           }
                         },
                         color: Colors.red,
@@ -340,14 +324,14 @@ class _HomeState extends State<Home> {
                             }
                           }
                           else{
-                            print('xxxx');
+                            print('login with facebook already');
                           }
                         },
                         icon: Icon(Icons.tag_faces),
                         label: Text('Facebook'),
                       ),
                     ),
-                  )
+                  ),
                 ],
               ),
               SizedBox(height: 90,),
@@ -357,5 +341,29 @@ class _HomeState extends State<Home> {
       ),
     );
   }
-
+  Future<void> googleSignIn() async{
+      try{
+        await _googleSignIn.signIn();
+        print(currentUser);
+      }catch(error){
+        print(error.toString());
+        setState(() {
+          Fluttertoast.showToast(msg: error.toString(),
+            toastLength: Toast.LENGTH_SHORT,
+            gravity: ToastGravity.CENTER,
+            backgroundColor: Colors.black,
+            textColor: Colors.white,
+          );
+        });
+      }
+  }
+  void googleSignOut(){
+    _googleSignIn.disconnect();
+  }
+  void facebookLogOut() async{
+    await facebookLogin.logOut();
+    setState(() {
+      fbLogin=false;
+    });
+  }
 }
