@@ -1,7 +1,10 @@
+import 'dart:convert';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:mysql1/mysql1.dart';
-import 'package:user_login/MySqlRegistration.dart';
+import 'package:http/http.dart' as http;
 
 void main() => runApp(MaterialApp(
   home: Register(),
@@ -32,8 +35,7 @@ class _RegisterState extends State<Register> {
   final address=TextEditingController();
   String addressError;
 
-  var db=new MySqlRegistration();
-
+  bool btn=false;
   @override
   Widget build(BuildContext context) {
 
@@ -287,6 +289,7 @@ class _RegisterState extends State<Register> {
 
                   onPressed: (){
                     setState(() {
+                      btn=!btn;
                       bool veracity=false;
                       RegExp rg=RegExp(r'^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[!@#\$&*~]).{8,}$');
                       RegExp rgContact=RegExp(r'(^(?:[+01])?[0-9]{10,11}$)');
@@ -323,6 +326,7 @@ class _RegisterState extends State<Register> {
                                               condoError=null;
                                               if(address!=null){
                                                 veracity=true;
+                                                register();
                                               }
                                               else{addressError='Field cannot be left empty';}
                                             }
@@ -354,7 +358,8 @@ class _RegisterState extends State<Register> {
                       }
                     });
                   },
-                  color: Colors.indigo[400],
+                  highlightColor: Colors.indigo[600],
+                  color: btn?Colors.indigo[600]:Colors.indigo[400],
                   padding: EdgeInsets.fromLTRB(30.0, 15, 30.0, 15),
                   child: Text(
                     'REGISTER',
@@ -376,5 +381,39 @@ class _RegisterState extends State<Register> {
         ),
       ),
     );
+  }
+  void register() async{
+    var url='https://filaceous-worksheet.000webhostapp.com/register.php';
+    var data={
+      "name":name.text,
+      "password":password.text,
+      "contactNumber":contact.text,
+      "email":email.text,
+      "condo":condo.text,
+      "address":address.text
+    };
+    var res=await http.post(url,body:data);
+    if(json.decode(res.body)=="account already exist"){
+      print('ACCOUNT ALREADY EXIST');
+      Fluttertoast.showToast(msg: 'account already exist',
+      toastLength: Toast.LENGTH_LONG,
+      gravity: ToastGravity.BOTTOM,
+      backgroundColor: Colors.black,
+      textColor: Colors.white,);
+    }
+    if(json.decode(res.body)=='true'){
+      Fluttertoast.showToast(msg: 'Thank you for signing up',
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.BOTTOM,
+        backgroundColor: Colors.black,
+        textColor: Colors.white,);
+    }
+    else{
+      Fluttertoast.showToast(msg: 'Error when registering, please try again later',
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.BOTTOM,
+        backgroundColor: Colors.black,
+        textColor: Colors.white,);
+    }
   }
 }

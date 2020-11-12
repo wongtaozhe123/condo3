@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/cupertino.dart';
@@ -5,7 +6,6 @@ import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:flutter_login_facebook/flutter_login_facebook.dart';
 import 'package:http/http.dart' as http;
-import 'dart:convert' as JSON;
 import 'package:fluttertoast/fluttertoast.dart';
 
 GoogleSignIn _googleSignIn=GoogleSignIn(
@@ -30,11 +30,13 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> {
-  final name=TextEditingController();
+  final memail=TextEditingController();
   String nameError;
   final password=TextEditingController();
   bool seePassword=true;
   String passwordError;
+
+  bool btnlogin=false;
 
   // VARIABLES FOR GOOGLE LOGIN
   GoogleSignInAccount currentUser;
@@ -52,8 +54,7 @@ class _HomeState extends State<Home> {
         currentUser=account;
       });
     });
-    print('$currentUser, is xxxx');
-    _googleSignIn.signInSilently();
+    _googleSignIn.signInSilently(); 
   }
 
   @override
@@ -121,7 +122,7 @@ class _HomeState extends State<Home> {
                   Container( //USERNAME
                     margin: EdgeInsets.fromLTRB(20.0, 10, 20.0, 2),
                     child: TextFormField(
-                      controller: name,
+                      controller: memail,
                       showCursor: true,
                       decoration: new InputDecoration(
                           fillColor: Colors.white60,
@@ -137,7 +138,7 @@ class _HomeState extends State<Home> {
                           errorBorder: OutlineInputBorder(
                               borderSide: BorderSide(color: Colors.red[600])
                           ),
-                          hintText: 'Username',
+                          hintText: 'Email',
                           hintStyle: TextStyle(
                               color: Colors.grey[500]
                           )
@@ -185,42 +186,22 @@ class _HomeState extends State<Home> {
                 child: RaisedButton(
                   onPressed: (){
                     setState(() {
-                      bool veracity=false;
-                      RegExp rg=RegExp(r'^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[!@#\$&*~]).{8,}$');
-                      RegExp rgContact=RegExp(r'(^(?:[+01])?[0-9]{10,11}$)');
-                      RegExp rgEmail=RegExp(r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+-/=?^_`{|}~]+@[a-zA-Z0-9]+\.[a-zA-Z]");
-                      if(!veracity){
-                        if(name==null){
-                          nameError='Field cannot be empty';
+                      btnlogin=!btnlogin;
+                      if(memail.text!=null){
+                        nameError=null;
+                        if(password.text!=null){
+                          manualSignin();
                         }
-                        else{
-                          if(name.text.length<8){
-                            nameError='Name is too short';
-                          }
-                          else{
-                            nameError=null; //NAME IS CORRECT CHECK FOR PASSWORD
-                            if(password==null){
-                              passwordError='Field cannot be empty';
-                            }
-                            else{
-                              if(password.text.length<8){
-                                passwordError='Password must have at least 8 characters';
-                              }
-                              else{
-                                if(rg.hasMatch(password.text)){
-                                  passwordError=null;
-                                }
-                                else{
-                                  passwordError='Need an uppercase, a lowercase, a number, a special character';
-                                }
-                              }
-                            }
-                          }
-                        }
+                        else{passwordError='Field must not be left empty';}
                       }
+                      else{
+                        nameError='Field must not be left empty';
+                      }
+                      manualSignin();
                     });
                   },
-                  color: Colors.indigo[400],
+                  color: btnlogin?Colors.indigo[600]:Colors.indigo[400],
+                  highlightColor: Colors.indigo[600],
                   padding: EdgeInsets.fromLTRB(30.0, 15, 30.0, 15),
                   child: Text(
                     'LOGIN',
@@ -299,7 +280,7 @@ class _HomeState extends State<Home> {
                               case FacebookLoginStatus.Success:
                                 final token=result.accessToken.token;
                                 final graphResponse=await http.get('https://graph.facebook.com/v2.12/me?fields=name,picture,email&access_token=$token');
-                                final profile=JSON.jsonDecode(graphResponse.body);
+                                final profile=json.decode(graphResponse.body);
                                 print(profile['name']);
                                 setState(() {
                                   facebookProfile=profile;
@@ -365,5 +346,41 @@ class _HomeState extends State<Home> {
     setState(() {
       fbLogin=false;
     });
+  }
+  void manualSignin()async {
+    var url='https://filaceous-worksheet.000webhostapp.com/login.php';
+    var data={
+      "email":memail.text,
+      "password":password.text
+    };
+    var res= await http.post(url,body: data);
+    if(json.decode(res.body)=="true"){
+      Fluttertoast.showToast(msg: 'Welcome',
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.BOTTOM,
+        backgroundColor: Colors.black,
+        textColor: Colors.white,);
+    }
+    else if(json.decode(res.body)=="false"){
+      Fluttertoast.showToast(msg: 'Invalid password input',
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.BOTTOM,
+        backgroundColor: Colors.black,
+        textColor: Colors.white,);
+    }
+    else if(json.decode(res.body)=="no email"){
+      Fluttertoast.showToast(msg: 'Invalid email input',
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.BOTTOM,
+        backgroundColor: Colors.black,
+        textColor: Colors.white,);
+    }
+    else{
+      Fluttertoast.showToast(msg: 'Error logging in',
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.BOTTOM,
+        backgroundColor: Colors.black,
+        textColor: Colors.white,);
+    }
   }
 }
