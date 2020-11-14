@@ -1,13 +1,19 @@
 import 'dart:convert';
-
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:mysql1/mysql1.dart';
 import 'package:http/http.dart' as http;
+import 'main.dart';
+import 'home.dart';
 
 void main() => runApp(MaterialApp(
-  home: Register(),
+  // home: Register(),
+  routes: {
+    '/':(context)=> Home(),
+    '/register':(context)=>Register(),
+    '/home':(context)=>Loading()
+  },
 ));
 
 MyApp(){}
@@ -30,12 +36,14 @@ class _RegisterState extends State<Register> {
   String contactError;
   final email=TextEditingController();
   String emailError;
-  final condo=TextEditingController();
-  String condoError;
   final address=TextEditingController();
   String addressError;
 
+  var condoList=['PV','Teratai','The Nest','Pelangi'];
+  var defaultCondo='PV';
+
   bool btn=false;
+  bool nextPage=false;
   @override
   Widget build(BuildContext context) {
 
@@ -229,29 +237,71 @@ class _RegisterState extends State<Register> {
                       ),
                     ),
                     Divider(height: 0, indent: 10, endIndent: 10, color: Colors.grey),
-                    Container( //CONDO
-                      margin: EdgeInsets.fromLTRB(20.0, 10, 20.0, 2),
-                      child: TextFormField(
-                        controller: condo,
-                        showCursor: true,
-                        decoration: new InputDecoration(
-                            errorText: condoError,
-                            enabledBorder: OutlineInputBorder(
-                              borderSide: BorderSide(color: Colors.transparent),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Container(
+                          padding: EdgeInsets.fromLTRB(30,10,10,0),
+                          child: Text('condo',
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: Colors.black54
                             ),
-                            focusedBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.all(Radius.circular(20.0)),
-                              borderSide: BorderSide(color: Colors.indigo[200]),
-                            ),
-                            suffixIcon: Icon(Icons.home),
-                            hintText: 'Condo',
-                            labelText: 'Condo',
-                            hintStyle: TextStyle(
-                                color: Colors.grey[500]
-                            )
+                          ),
                         ),
-                      ),
+                        Container(
+                          padding: EdgeInsets.fromLTRB(30,0,30,0),
+                          decoration: BoxDecoration(
+                              border: Border.all(width: 2.5, color: Colors.white)
+                          ),
+                          child: DropdownButton<String>(
+                            dropdownColor: Colors.white,
+                            elevation: 20,
+                            isExpanded: true,
+                            hint: Text(
+                              'condo',
+                            ),
+                            items: condoList.map((String e) {
+                              return DropdownMenuItem<String>(
+                                child: Text(e),
+                                value: e,
+                              );
+                            }).toList(),
+                            onChanged: (String c){
+                              setState(() {
+                                this.defaultCondo=c;
+                              });
+                            },
+                            value: defaultCondo,
+                          ),
+                        ),
+
+                      ],
+
                     ),
+                    // Container( //CONDO
+                    //   margin: EdgeInsets.fromLTRB(20.0, 10, 20.0, 2),
+                    //   child: TextFormField(
+                    //     controller: condo,
+                    //     showCursor: true,
+                    //     decoration: new InputDecoration(
+                    //         errorText: condoError,
+                    //         enabledBorder: OutlineInputBorder(
+                    //           borderSide: BorderSide(color: Colors.transparent),
+                    //         ),
+                    //         focusedBorder: OutlineInputBorder(
+                    //           borderRadius: BorderRadius.all(Radius.circular(20.0)),
+                    //           borderSide: BorderSide(color: Colors.indigo[200]),
+                    //         ),
+                    //         suffixIcon: Icon(Icons.home),
+                    //         hintText: 'Condo',
+                    //         labelText: 'Condo',
+                    //         hintStyle: TextStyle(
+                    //             color: Colors.grey[500]
+                    //         )
+                    //     ),
+                    //   ),
+                    // ),
                     Divider(height: 0, indent: 10, endIndent: 10, color: Colors.grey),
                     Container( //ADDRESS
                       margin: EdgeInsets.fromLTRB(20.0, 10, 20.0, 2),
@@ -286,16 +336,15 @@ class _RegisterState extends State<Register> {
                 margin: EdgeInsets.fromLTRB(20, 10, 20, 20),
                 width: 200,
                 child: RaisedButton(
-
                   onPressed: (){
                     setState(() {
-                      btn=!btn;
+                      btn=true;
                       bool veracity=false;
                       RegExp rg=RegExp(r'^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[!@#\$&*~]).{8,}$');
                       RegExp rgContact=RegExp(r'(^(?:[+01])?[0-9]{10,11}$)');
                       RegExp rgEmail=RegExp(r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+-/=?^_`{|}~]+@[a-zA-Z0-9]+\.[a-zA-Z]");
                       if(!veracity){
-                        if(name==null){
+                        if(name.text.length<1){
                           nameError='Field cannot be empty';
                         }
                         else{
@@ -303,54 +352,49 @@ class _RegisterState extends State<Register> {
                             nameError='Name is too short';
                           }
                           else{
-                            nameError=null; //NAME IS CORRECT CHECK FOR PASSWORD
-                            if(password==null){
-                              passwordError='Field cannot be empty';
+                            if(password.text.length<8&&password.text.length>20){
+                              passwordError='Password must be between 8 to 20 characters';
                             }
                             else{
-                              if(password.text.length<8&&password.text.length>20){
-                                passwordError='Password must be between 8 to 20 characters';
-                              }
-                              else{
-                                if(rg.hasMatch(password.text)){
-                                  passwordError=null;
-                                  if(password.text==confirmPassword.text){ //PASSWORD AND CONFIRM PASSWORD IS CORRECT CHECK FOR PHONE NUMBER
-                                    confirmPasswordError=null;
-                                    if(contact!=null){
-                                      if(rgContact.hasMatch(contact.text)){
-                                        contactError=null;
-                                        if(email.text!=null){ //EMAIL IS CORRECT
-                                          if(rgEmail.hasMatch(email.text)){
-                                            emailError=null;
-                                            if(condo!=null){
-                                              condoError=null;
-                                              if(address!=null){
-                                                veracity=true;
-                                                register();
-                                              }
-                                              else{addressError='Field cannot be left empty';}
-                                            }
-                                            else{condoError='Field cannot be left empty';}
+                              if(rg.hasMatch(password.text)){
+                                passwordError=null;
+                                if(password.text==confirmPassword.text){
+                                  if(contact.text.length>0){
+                                    if(rgContact.hasMatch(contact.text)){
+                                      contactError=null;
+                                      if(email.text.length>0){
+                                        if(rgEmail.hasMatch((email.text))){
+                                          emailError=null;
+                                          if(address.text.length>0){
+                                            veracity=true;
+                                            register();
                                           }
-                                          else{emailError='Please enter a valid email';}
+                                          else{
+                                            addressError='Field cannot be left empty';
+                                          }
                                         }
-                                        else{emailError='Field cannot be left empty';}
+                                        else{
+                                          emailError='Please enter a valid email';
+                                        }
                                       }
                                       else{
-                                        contactError='Please enter a valid phone number';
+                                        emailError='Field cannot be left empty';
                                       }
                                     }
                                     else{
-                                      contactError='Field cannot be left empty';
+                                      contactError='Please enter a valid phone number';
                                     }
                                   }
                                   else{
-                                    confirmPasswordError='This does not match your password';
+                                    contactError='Field cannot be left empty';
                                   }
                                 }
                                 else{
-                                  passwordError='Need an uppercase, a lowercase, a number, a special character';
+                                  confirmPasswordError='This does not match your password';
                                 }
+                              }
+                              else{
+                                passwordError='Need an uppercase, a lowercase, a number, a special character';
                               }
                             }
                           }
@@ -389,7 +433,7 @@ class _RegisterState extends State<Register> {
       "password":password.text,
       "contactNumber":contact.text,
       "email":email.text,
-      "condo":condo.text,
+      "condo":defaultCondo,
       "address":address.text
     };
     var res=await http.post(url,body:data);
@@ -407,6 +451,8 @@ class _RegisterState extends State<Register> {
         gravity: ToastGravity.BOTTOM,
         backgroundColor: Colors.black,
         textColor: Colors.white,);
+      nextPage=true;
+      if(nextPage){Navigator.pushReplacementNamed(context,'/home');}
     }
     else{
       Fluttertoast.showToast(msg: 'Error when registering, please try again later',

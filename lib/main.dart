@@ -7,6 +7,8 @@ import 'package:google_sign_in/google_sign_in.dart';
 import 'package:flutter_login_facebook/flutter_login_facebook.dart';
 import 'package:http/http.dart' as http;
 import 'package:fluttertoast/fluttertoast.dart';
+import 'register.dart';
+import 'home.dart';
 
 GoogleSignIn _googleSignIn=GoogleSignIn(
   scopes: <String> [
@@ -16,10 +18,11 @@ GoogleSignIn _googleSignIn=GoogleSignIn(
 );
 
 void main() => runApp(MaterialApp(
-  home: Home(),
-  // routes: {
-  //   '/':(context) => Home()
-  // },
+  routes: {
+    '/':(context)=> Home(),
+    '/register':(context)=>Register(),
+    '/home':(context)=>Loading()
+  },
 ));
 
 MyApp(){}
@@ -37,7 +40,7 @@ class _HomeState extends State<Home> {
   String passwordError;
 
   bool btnlogin=false;
-
+  bool nextPage=false;
   // VARIABLES FOR GOOGLE LOGIN
   GoogleSignInAccount currentUser;
 
@@ -186,10 +189,10 @@ class _HomeState extends State<Home> {
                 child: RaisedButton(
                   onPressed: (){
                     setState(() {
-                      btnlogin=!btnlogin;
-                      if(memail.text!=null){
+                      btnlogin=true;
+                      if(memail.text.length>0){
                         nameError=null;
-                        if(password.text!=null){
+                        if(password.text.length>0){
                           manualSignin();
                         }
                         else{passwordError='Field must not be left empty';}
@@ -197,7 +200,6 @@ class _HomeState extends State<Home> {
                       else{
                         nameError='Field must not be left empty';
                       }
-                      manualSignin();
                     });
                   },
                   color: btnlogin?Colors.indigo[600]:Colors.indigo[400],
@@ -250,7 +252,8 @@ class _HomeState extends State<Home> {
                   Expanded(
                     flex: 1,
                     child: Container(
-                      padding: EdgeInsets.all(25),
+                      height: 80,
+                      padding: EdgeInsets.all(15),
                       child: RaisedButton.icon(
                         onPressed: () {
                           if(currentUser==null){
@@ -262,14 +265,22 @@ class _HomeState extends State<Home> {
                         },
                         color: Colors.red,
                         icon: Icon(Icons.email_rounded),
-                        label: Text('G-Mail'),
+                        label: Text('G-Mail',
+                          style: TextStyle(
+                            fontFamily: 'Poppins',
+                            fontSize: 18,
+                            fontWeight: FontWeight.w300,
+                            letterSpacing: -1
+                          ),
+                        ),
                       ),
                     ),
                   ),
                   Expanded(
                     flex: 1,
                     child: Container(
-                      padding: EdgeInsets.all(20),
+                      height: 80,
+                      padding: EdgeInsets.all(15),
                       child: RaisedButton.icon(
                         color: Colors.blue,
                         onPressed: () async{
@@ -308,10 +319,46 @@ class _HomeState extends State<Home> {
                             print('login with facebook already');
                           }
                         },
-                        icon: Icon(Icons.tag_faces),
-                        label: Text('Facebook'),
+                        icon: Icon(Icons.people_alt),
+                        label: Text('Facebook',
+                          style: TextStyle(
+                              fontFamily: 'Poppins',
+                              fontSize: 16,
+                              fontWeight: FontWeight.w300,
+                              letterSpacing: -1),
+                        ),
                       ),
                     ),
+                  ),
+                ],
+              ),
+              SizedBox(height: 30,),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Container(
+                    child: Text(
+                        "DON'T HAVE AN ACCOUNT YET?  ",
+                      style: TextStyle(
+                        fontSize: 15,
+                        color: Colors.black
+                      ),
+                    ),
+                  ),
+                  GestureDetector(
+                    onTap: (){
+                      Navigator.pushNamed(context, '/register');
+                    },
+                    child: Text(
+                    "Sign Up ",
+                    style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 15,
+                        color: Colors.black,
+                        decoration: TextDecoration.underline
+                    ),
+
+                  ),
                   ),
                 ],
               ),
@@ -347,7 +394,7 @@ class _HomeState extends State<Home> {
       fbLogin=false;
     });
   }
-  void manualSignin()async {
+  Future manualSignin()async {
     var url='https://filaceous-worksheet.000webhostapp.com/login.php';
     var data={
       "email":memail.text,
@@ -360,6 +407,8 @@ class _HomeState extends State<Home> {
         gravity: ToastGravity.BOTTOM,
         backgroundColor: Colors.black,
         textColor: Colors.white,);
+      nextPage=true;
+      if(nextPage){Navigator.pushReplacementNamed(context, '/home');}
     }
     else if(json.decode(res.body)=="false"){
       Fluttertoast.showToast(msg: 'Invalid password input',

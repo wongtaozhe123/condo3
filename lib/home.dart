@@ -20,7 +20,7 @@ class _LoadingState extends State<Loading> {
   var name;
   @override
   void initState(){
-    getData();
+
   }
 
   @override
@@ -29,7 +29,7 @@ class _LoadingState extends State<Loading> {
     return Scaffold(
       body: Center(
         child: Text(
-          '$name',
+          'HOME',
           style: TextStyle(
             fontSize: 40,
             letterSpacing: 3,
@@ -39,10 +39,4 @@ class _LoadingState extends State<Loading> {
     );
   }
 
-  Future getData() async{
-    var url='https://filaceous-worksheet.000webhostapp.com/get.php';
-    http.Response response=await http.get(url);
-    print(jsonDecode(response.body.toString()));
-    name=response.body.toString();
-  }
 }
