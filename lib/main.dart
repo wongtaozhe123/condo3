@@ -41,6 +41,7 @@ class _HomeState extends State<Home> {
 
   bool btnlogin=false;
   bool nextPage=false;
+
   // VARIABLES FOR GOOGLE LOGIN
   GoogleSignInAccount currentUser;
 
@@ -57,7 +58,7 @@ class _HomeState extends State<Home> {
         currentUser=account;
       });
     });
-    _googleSignIn.signInSilently(); 
+    _googleSignIn.signInSilently();
   }
 
   @override
@@ -260,7 +261,8 @@ class _HomeState extends State<Home> {
                             googleSignIn();
                           }
                           else{
-                            print('$currentUser.email, not null when press');
+                            print('$currentUser, not null when press');
+                            checkExistGoogle();
                           }
                         },
                         color: Colors.red,
@@ -297,6 +299,7 @@ class _HomeState extends State<Home> {
                                   facebookProfile=profile;
                                   fbLogin=true;
                                 });
+                                print('$facebookLogin aaaaaaaaaaaaa');
                                 break;
                               case FacebookLoginStatus.Cancel:
                                 setState(() {
@@ -357,7 +360,6 @@ class _HomeState extends State<Home> {
                         color: Colors.black,
                         decoration: TextDecoration.underline
                     ),
-
                   ),
                   ),
                 ],
@@ -369,10 +371,28 @@ class _HomeState extends State<Home> {
       ),
     );
   }
+
+  Future checkExistGoogle() async{
+    var url='https://filaceous-worksheet.000webhostapp.com/checkGoogleAccount.php';
+    var data={
+      "google": currentUser.email.toString(),
+    };
+    var res= await http.post(url,body: data);
+    print(json.decode(res.body).toString());
+    if(json.decode(res.body).toString().contains("true")){
+      Navigator.pushReplacementNamed(context, '/home');
+    }
+    else if(json.decode(res.body)=="false"){
+      Navigator.pushReplacementNamed(context, '/register',arguments: {
+        'google':currentUser.email.toString(),
+        'facebook':"null",
+      });
+    }
+  }
+
   Future<void> googleSignIn() async{
       try{
         await _googleSignIn.signIn();
-        print(currentUser);
       }catch(error){
         print(error.toString());
         setState(() {

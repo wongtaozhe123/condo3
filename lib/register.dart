@@ -427,6 +427,9 @@ class _RegisterState extends State<Register> {
     );
   }
   void register() async{
+    Map cd=ModalRoute.of(context).settings.arguments;
+    var google=await cd['google'];
+    var facebook=await cd['facebook'];
     var url='https://filaceous-worksheet.000webhostapp.com/register.php';
     var data={
       "name":name.text,
@@ -434,9 +437,12 @@ class _RegisterState extends State<Register> {
       "contactNumber":contact.text,
       "email":email.text,
       "condo":defaultCondo,
-      "address":address.text
+      "address":address.text,
+      "google":google.toString(),
+      "facebook":facebook.toString()
     };
     var res=await http.post(url,body:data);
+    print(json.decode(res.body));
     if(json.decode(res.body)=="account already exist"){
       print('ACCOUNT ALREADY EXIST');
       Fluttertoast.showToast(msg: 'account already exist',

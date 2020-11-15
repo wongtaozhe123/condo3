@@ -2,11 +2,14 @@ import 'dart:convert';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'condo.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'adminLogin.dart';
 
 void main()=> runApp(MaterialApp(
-  home: AdminHome(),
+    routes: {
+      '/':(context)=> AdminLogin(),
+      '/ahome':(context)=>AdminHome()
+    }
 ));
 
 class AdminHome extends StatefulWidget {
@@ -15,15 +18,9 @@ class AdminHome extends StatefulWidget {
 }
 
 class _AdminHomeState extends State<AdminHome> {
-  String condo;
-
-  List<Condo> condos=[
-    Condo(address: 'xxx',name: 'Tao Zhe',email: 'email', condo: 'Pelangi', contact: '0163661727')
-  ];
 
   @override
   Widget build(BuildContext context) {
-
     return Scaffold(
       appBar: AppBar(
         title: Text('condo details'),
