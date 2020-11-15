@@ -1,6 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
-
+import 'package:firebase_auth/firebase_auth.dart' as auth;
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
@@ -333,6 +333,7 @@ class _HomeState extends State<Home> {
                       ),
                     ),
                   ),
+                  RaisedButton(onPressed: googleSignOut)
                 ],
               ),
               SizedBox(height: 30,),
@@ -350,7 +351,10 @@ class _HomeState extends State<Home> {
                   ),
                   GestureDetector(
                     onTap: (){
-                      Navigator.pushNamed(context, '/register');
+                      Navigator.pushNamed(context, '/register',arguments: {
+                        'google':"null",
+                        'facebook':"null",
+                      });
                     },
                     child: Text(
                     "Sign Up ",
@@ -392,7 +396,11 @@ class _HomeState extends State<Home> {
 
   Future<void> googleSignIn() async{
       try{
-        await _googleSignIn.signIn();
+        GoogleSignInAccount googleUser = await _googleSignIn.signIn();
+        setState(() {
+          currentUser=googleUser;
+        });
+        checkExistGoogle();
       }catch(error){
         print(error.toString());
         setState(() {

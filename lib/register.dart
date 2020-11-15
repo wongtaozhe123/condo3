@@ -430,7 +430,7 @@ class _RegisterState extends State<Register> {
     Map cd=ModalRoute.of(context).settings.arguments;
     var google=await cd['google'];
     var facebook=await cd['facebook'];
-    var url='https://filaceous-worksheet.000webhostapp.com/register.php';
+    var url='https://filaceous-worksheet.000webhostapp.com/signup.php';
     var data={
       "name":name.text,
       "password":password.text,
