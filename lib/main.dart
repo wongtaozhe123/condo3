@@ -333,7 +333,6 @@ class _HomeState extends State<Home> {
                       ),
                     ),
                   ),
-                  RaisedButton(onPressed: googleSignOut)
                 ],
               ),
               SizedBox(height: 30,),
