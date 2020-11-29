@@ -4,7 +4,8 @@ import 'package:firebase_auth/firebase_auth.dart' as auth;
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
-import 'package:flutter_login_facebook/flutter_login_facebook.dart';
+// import 'package:flutter_login_facebook/flutter_login_facebook.dart';
+import 'package:flutter_facebook_login/flutter_facebook_login.dart';
 import 'package:http/http.dart' as http;
 import 'package:fluttertoast/fluttertoast.dart';
 import 'register.dart';
@@ -287,10 +288,11 @@ class _HomeState extends State<Home> {
                         color: Colors.blue,
                         onPressed: () async{
                           if(!fbLogin){
-                            final result = await facebookLogin.logIn();
-                            print(result);
+                            // final result = await facebookLogin.logIn();
+                            final result = await facebookLogin.logIn(['email']);
+                            print("$result aaaaaa ");
                             switch(result.status){
-                              case FacebookLoginStatus.Success:
+                              case FacebookLoginStatus.loggedIn:
                                 final token=result.accessToken.token;
                                 final graphResponse=await http.get('https://graph.facebook.com/v2.12/me?fields=name,picture,email&access_token=$token');
                                 final profile=json.decode(graphResponse.body);
@@ -299,17 +301,16 @@ class _HomeState extends State<Home> {
                                   facebookProfile=profile;
                                   fbLogin=true;
                                 });
-                                print('$facebookLogin aaaaaaaaaaaaa');
                                 break;
-                              case FacebookLoginStatus.Cancel:
+                              case FacebookLoginStatus.cancelledByUser:
                                 setState(() {
                                   fbLogin=false;
                                 });
                                 break;
-                              case FacebookLoginStatus.Error:
+                              case FacebookLoginStatus.error:
                                 setState(() {
                                   fbLogin=false;
-                                  Fluttertoast.showToast(msg: ErrorDescription(result.error.toString()).toString(),
+                                  Fluttertoast.showToast(msg: ErrorDescription(result.errorMessage.toString()).toString(),
                                     toastLength: Toast.LENGTH_SHORT,
                                     gravity: ToastGravity.CENTER,
                                     backgroundColor: Colors.black,

@@ -46,9 +46,10 @@ class _RegisterState extends State<Register> {
   bool nextPage=false;
   @override
   Widget build(BuildContext context) {
-
+    // Map gTemp=ModalRoute.of(context).settings.arguments;
+    // String g=gTemp['google'];
+    // if(g!="null"){email.text=g;}
     return Scaffold(
-
       // backgroundColor: Colors.grey[300],
       body: Container(
         decoration: BoxDecoration(
@@ -348,8 +349,8 @@ class _RegisterState extends State<Register> {
                           nameError='Field cannot be empty';
                         }
                         else{
-                          if(name.text.length<8){
-                            nameError='Name is too short';
+                          if(name.text.length<6 || name.text.length>20){
+                            nameError='Name must be between 6 to 20 characters';
                           }
                           else{
                             if(password.text.length<8&&password.text.length>20){
