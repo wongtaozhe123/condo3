@@ -46,9 +46,9 @@ class _RegisterState extends State<Register> {
   bool nextPage=false;
   @override
   Widget build(BuildContext context) {
-    // Map gTemp=ModalRoute.of(context).settings.arguments;
-    // String g=gTemp['google'];
-    // if(g!="null"){email.text=g;}
+    Map gTemp=ModalRoute.of(context).settings.arguments;
+    String g=gTemp['email'];
+    if(g!="null"){email.text=g;}
     return Scaffold(
       // backgroundColor: Colors.grey[300],
       body: Container(
@@ -428,9 +428,9 @@ class _RegisterState extends State<Register> {
     );
   }
   void register() async{
-    Map cd=ModalRoute.of(context).settings.arguments;
-    var google=await cd['google'];
-    var facebook=await cd['facebook'];
+    // Map cd=ModalRoute.of(context).settings.arguments;
+    // var google=await cd['google'];
+    // var facebook=await cd['facebook'];
     var url='https://filaceous-worksheet.000webhostapp.com/signup.php';
     var data={
       "name":name.text,
@@ -439,8 +439,6 @@ class _RegisterState extends State<Register> {
       "email":email.text,
       "condo":defaultCondo,
       "address":address.text,
-      "google":google.toString(),
-      "facebook":facebook.toString()
     };
     var res=await http.post(url,body:data);
     print(json.decode(res.body));

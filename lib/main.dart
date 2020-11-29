@@ -290,17 +290,17 @@ class _HomeState extends State<Home> {
                           if(!fbLogin){
                             // final result = await facebookLogin.logIn();
                             final result = await facebookLogin.logIn(['email']);
-                            print("$result aaaaaa ");
                             switch(result.status){
                               case FacebookLoginStatus.loggedIn:
                                 final token=result.accessToken.token;
                                 final graphResponse=await http.get('https://graph.facebook.com/v2.12/me?fields=name,picture,email&access_token=$token');
                                 final profile=json.decode(graphResponse.body);
-                                print(profile['name']);
                                 setState(() {
                                   facebookProfile=profile;
                                   fbLogin=true;
                                 });
+                                checkExistFacebook();
+                                print(facebookProfile['email']);
                                 break;
                               case FacebookLoginStatus.cancelledByUser:
                                 setState(() {
@@ -352,8 +352,7 @@ class _HomeState extends State<Home> {
                   GestureDetector(
                     onTap: (){
                       Navigator.pushNamed(context, '/register',arguments: {
-                        'google':"null",
-                        'facebook':"null",
+                         'email':"null"
                       });
                     },
                     child: Text(
@@ -388,12 +387,26 @@ class _HomeState extends State<Home> {
     }
     else if(json.decode(res.body)=="false"){
       Navigator.pushReplacementNamed(context, '/register',arguments: {
-        'google':currentUser.email.toString(),
-        'facebook':"null",
+        'email':"null"
       });
     }
   }
-
+  Future checkExistFacebook() async{
+    var url = 'https://filaceous-worksheet.000webhostapp.com/checkFacebookAccount.php';
+    var data={
+      "facebook":facebookProfile['email']
+    };
+    var res = await http.post(url,body: data);
+    print(json.decode(res.body).toString());
+    if(json.decode(res.body).toString().contains("true")){
+      Navigator.pushReplacementNamed(context, '/home');
+    }
+    else if(json.decode(res.body)=="false"){
+      Navigator.pushReplacementNamed(context, '/register',arguments: {
+        'email':facebookProfile['email']
+      });
+    }
+  }
   Future<void> googleSignIn() async{
       try{
         GoogleSignInAccount googleUser = await _googleSignIn.signIn();
